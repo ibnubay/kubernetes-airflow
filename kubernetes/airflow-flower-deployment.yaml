@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: airflow
+  labels:
+    airflow-app: flower
+  name: airflow-flower
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      airflow-app: flower
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        airflow-app: flower
+    spec:
+      containers:
+        - name: airflow-flower
+          args:
+            - flower
+          image: 'ibnay/k-airflow:1.10.10'
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5555
+          # resources: {}
+      restartPolicy: Always
+      # serviceAccountName: ""
+      # volumes: null
+status: {}

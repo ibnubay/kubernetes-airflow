@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: airflow
+  labels:
+    airflow-app: worker
+  name: airflow-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      airflow-app: worker
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        airflow-app: worker
+    spec:
+      containers:
+        - name: airflow-worker
+          args:
+            - worker
+          image: 'ibnay/k-airflow:1.10.10'
+          imagePullPolicy: IfNotPresent
+          resources: {}
+      restartPolicy: Always
+      # serviceAccountName: ""
+status: {}

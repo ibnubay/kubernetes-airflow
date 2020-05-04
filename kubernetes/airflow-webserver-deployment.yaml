@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: airflow
+  labels:
+   airflow-app: webserver
+  name: airflow-webserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      airflow-app: webserver
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      namespace: airflow
+      labels:
+        airflow-app: webserver
+    spec:
+      containers:
+        - name: airflow-webserver
+          args:
+            - webserver
+          image: 'ibnay/k-airflow:1.10.10'
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          # resources: {}
+      restartPolicy: Always
+      # serviceAccountName: ""
+status: {}

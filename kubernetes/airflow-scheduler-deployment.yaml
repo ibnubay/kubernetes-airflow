@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: airflow
+  labels:
+    airflow-app: scheduler
+  name: airflow-scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      airflow-app: scheduler
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        airflow-app: scheduler
+    spec:
+      containers:
+      - name: airflow-scheduler
+        args:
+          - scheduler
+        image: 'ibnay/k-airflow:1.10.10'
+        imagePullPolicy: IfNotPresent
+        # resources: {}
+      restartPolicy: Always
+      # serviceAccountName: ""
+status: {}

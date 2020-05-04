@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: airflow
+  labels:
+    airflow-app: redis
+  name: airflow-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      airflow-app: redis
+  strategy: 
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        airflow-app: redis
+    spec:
+      containers:
+        - name: airflow-redis
+          image: redis:5.0.8-alpine
+          imagePullPolicy: IfNotPresent        
+          ports:
+            - containerPort: 6379
+        # resources: {}
+      restartPolicy: Always
+      # serviceAccountName: ""
+      # volumes: null
+status: {}
