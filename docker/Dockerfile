@@ -21,7 +21,6 @@ ENV AIRFLOW_CONFIG="/app/airflow.cfg"
 
 WORKDIR ${AIRFLOW_HOME}
 # Install packages
-ENV buildDeps='libffi-dev g++'
 
 COPY entrypoint /entrypoint
 COPY airflow.cfg /app/airflow.cfg
