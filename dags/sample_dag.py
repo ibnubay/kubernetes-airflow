@@ -8,7 +8,7 @@ data_team_args = {
     "owner": "your_project",
     "depends_on_past": False,
     "start_date": datetime(2020, 5, 1),
-    "email": ["your@mail.com"],
+    # "email": ["your@mail.com"],
     "backfill": False
 }
 

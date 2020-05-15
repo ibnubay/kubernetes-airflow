@@ -1,0 +1,127 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+   airflow-app: webserver
+  name: airflow-webserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      airflow-app: webserver
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        airflow-app: webserver
+    spec:
+      containers:
+        - name: airflow-webserver
+          args:
+            - webserver
+          image: 'ibnay/kube-airflow:1.10.10'
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: AIRFLOW__CORE__DAGS_FOLDER
+              value: "/app/airflow/codes/dags" # Change "dags" folder
+            - name: AIRFLOW__KUBERNETES__KUBE_CLIENT_REQUEST_ARGS
+              value: "" # Fill blank to avoid override default value in Airflow
+            - name: AIRFLOW__CORE__EXECUTOR
+              value: "KubernetesExecutor"
+            - name: AIRFLOW__KUBERNETES__DAGS_VOLUME_CLAIM
+              value: "airflow-dag-pv"
+            - name: AIRFLOW__KUBERNETES__DAGS_VOLUME_SUBPATH
+              value: "dags"
+            - name: AIRFLOW__KUBERNETES__WORKER_CONTAINER_REPOSITORY # last 3 configurations is a default image for worker running a task, can be override via executor_config in Airflow Operator
+              value: "ibnay/kube-airflow"
+            - name: AIRFLOW__KUBERNETES__WORKER_CONTAINER_TAG
+              value: "1.10.10"
+            - name: AIRFLOW__KUBERNETES__WORKER_CONTAINER_IMAGE_PULL_POLICY
+              value: "IfNotPresent"
+          ports:
+            - containerPort: 8080
+          # resources: {}
+          volumeMounts:
+            - name: airflow-dags-claim
+              mountPath: /app/airflow/codes
+      restartPolicy: Always
+      volumes:
+        - name: airflow-dags-claim
+          persistentVolumeClaim:
+            claimName: airflow-dag-pv
+      # serviceAccountName: ""
+status: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    airflow-app: webserver
+  name: airflow-webserver
+spec:
+  ports:
+  - name: "80"
+    port: 80
+    targetPort: 8080
+  selector:
+    airflow-app: webserver
+status:
+  loadBalancer: {}
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    airflow-app: scheduler
+  name: airflow-scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      airflow-app: scheduler
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        airflow-app: scheduler
+    spec:
+      containers:
+      - name: airflow-scheduler
+        args:
+          - scheduler
+        image: 'kube-airflow:1.10.10'
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: AIRFLOW__CORE__DAGS_FOLDER
+            value: "/app/airflow/codes/dags" # Change "dags" folder
+          - name: AIRFLOW__KUBERNETES__KUBE_CLIENT_REQUEST_ARGS
+            value: "" # Fill blank to avoid override default value in Airflow
+          - name: AIRFLOW__CORE__EXECUTOR
+            value: "KubernetesExecutor"
+          - name: AIRFLOW__KUBERNETES__DAGS_VOLUME_CLAIM
+            value: "airflow-dag-pv"
+          - name: AIRFLOW__KUBERNETES__DAGS_VOLUME_SUBPATH
+            value: "dags"
+          - name: AIRFLOW__KUBERNETES__WORKER_CONTAINER_REPOSITORY # last 3 configurations is a default image for worker running a task, can be override via executor_config in Airflow Operator
+            value: "ibnay/kube-airflow"
+          - name: AIRFLOW__KUBERNETES__WORKER_CONTAINER_TAG
+            value: "1.10.10"
+          - name: AIRFLOW__KUBERNETES__WORKER_CONTAINER_IMAGE_PULL_POLICY
+            value: "IfNotPresent"
+        # resources: {}
+        volumeMounts:
+          - name: airflow-dags-claim
+            mountPath: /app/airflow/codes
+      restartPolicy: Always
+      # serviceAccountName: ""
+      volumes:
+        - name: airflow-dags-claim
+          persistentVolumeClaim:
+            claimName: airflow-dag-pv
+status: {}

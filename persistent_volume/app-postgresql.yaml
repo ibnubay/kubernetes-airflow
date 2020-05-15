@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    airflow-app: postgres
+  name: airflow-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      airflow-app: postgres
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        airflow-app: postgres
+    spec:
+      containers:
+        - name: airflow-postgres
+          env:
+            - name: POSTGRES_PASSWORD
+              value: "postgres"
+          image: postgres:11.7-alpine
+          imagePullPolicy: IfNotPresent          
+          ports:
+            - containerPort: 5432          
+          # resources: {}          
+          volumeMounts:
+            - name: airflow-volume
+              mountPath: /docker-entrypoint-initdb.d/initdb.sql
+            
+      restartPolicy: Always
+      # serviceAccountName: ""
+      volumes:
+        - name: airflow-volume
+          hostPath:
+            path: /shared/persistent_volume/initdb.sql
+status: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    airflow-app: postgres
+  name: airflow-postgres
+spec:
+  ports:
+  - name: "5432"
+    port: 5432
+    targetPort: 5432
+  selector:
+    airflow-app: postgres
+status:
+  loadBalancer: {}
