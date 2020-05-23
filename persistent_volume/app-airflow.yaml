@@ -95,7 +95,7 @@ spec:
       - name: airflow-scheduler
         args:
           - scheduler
-        image: 'kube-airflow:1.10.10'
+        image: 'ibnay/kube-airflow:1.10.10'
         imagePullPolicy: IfNotPresent
         env:
           - name: AIRFLOW__CORE__DAGS_FOLDER
